@@ -39,8 +39,10 @@ Puedes comentar:
 ---
 
 ## Tester 3
-**Nombre:**
+**Nombre:** Jessica Baltazar Ñonthe
 
 **Comentarios:**
-
----
+1- El diseño es bonito y concuerda con el tema de la app.
+2- Sugiero que para agregar subir una cancion haya un boton a la vista en favoritos o en buscar, o agregar otra vista en medio de la vista "Buscar" y "Favoritos", y no este colocado en "Perfil" ya que ahi es unicamente informacion del usuario.
+3- Responsividad conforme a la imagen adjuntada de imagen1Responsividad en la parte de agregar cancion.
+4- Y confirmacion de si "Esta seguro de cerrar sesion?"
