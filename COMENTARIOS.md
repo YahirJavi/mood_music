@@ -46,3 +46,6 @@ Puedes comentar:
 2- Sugiero que para agregar subir una cancion haya un boton a la vista en favoritos o en buscar, o agregar otra vista en medio de la vista "Buscar" y "Favoritos", y no este colocado en "Perfil" ya que ahi es unicamente informacion del usuario.
 3- Responsividad conforme a la imagen adjuntada de imagen1Responsividad en la parte de agregar cancion.
 4- Y confirmacion de si "Esta seguro de cerrar sesion?"
+5- En las opciones de color de la app, en la opcion de "sistema" le pondría para que se ponga de un color azul para que no sea del mismo color oscuro que la otra opción.
+6- Como recomendación extra, le veo potencial para ser un convertidor de video a audio y se puedan descargar los audios,
+el diseño ya es muy y le quedaría a la app.
