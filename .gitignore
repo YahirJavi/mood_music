@@ -56,3 +56,5 @@ android/key.properties
 *firebase-adminsdk*.json
 # Caché local de Firebase
 .firebase/
+# Caché de Gradle en cualquier módulo
+**/.gradle/
