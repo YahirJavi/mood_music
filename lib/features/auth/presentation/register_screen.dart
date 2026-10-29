@@ -1,4 +1,6 @@
+import '../../../core/validation/form_validators.dart';
 import 'package:flutter/material.dart';
+import '../domain/password_policy.dart';
 import '../../../core/widgets/feedback.dart';
 import '../domain/auth_repository.dart';
 import 'auth_messages.dart';
@@ -38,19 +40,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       TextFormField(controller: name, enabled: !busy, textCapitalization: TextCapitalization.words,
         textInputAction: TextInputAction.next, autofillHints: const [AutofillHints.name], maxLength: 40,
         decoration: const InputDecoration(labelText: 'Nombre', prefixIcon: Icon(Icons.person_outline)),
-        validator: (v) => v == null || v.trim().isEmpty ? 'Escribe tu nombre' : null),
+        validator: validatePersonName),
       const SizedBox(height: 12),
       TextFormField(controller: email, enabled: !busy, keyboardType: TextInputType.emailAddress,
         textInputAction: TextInputAction.next, autofillHints: const [AutofillHints.email],
         decoration: const InputDecoration(labelText: 'Correo electrónico', prefixIcon: Icon(Icons.alternate_email)), validator: validateEmail),
       const SizedBox(height: 16),
-      TextFormField(controller: password, enabled: !busy, obscureText: hidePassword,
+      const Text('De 8 a 20 caracteres, con una letra, un número y un símbolo.'),
+      const SizedBox(height: 8),
+      TextFormField(controller: password, maxLength: 20, enabled: !busy, obscureText: hidePassword,
         autocorrect: false, enableSuggestions: false, textInputAction: TextInputAction.next,
         autofillHints: const [AutofillHints.newPassword],
         decoration: passwordDecoration('Contraseña', hidePassword, () => setState(() => hidePassword = !hidePassword)),
-        validator: (v) => v == null || v.length < 6 ? 'Usa al menos 6 caracteres' : null),
+        validator: validateNewPassword),
       const SizedBox(height: 16),
-      TextFormField(controller: confirmation, enabled: !busy, obscureText: hideConfirmation,
+      TextFormField(controller: confirmation, maxLength: 20, enabled: !busy, obscureText: hideConfirmation,
         autocorrect: false, enableSuggestions: false, onFieldSubmitted: (_) => submit(),
         decoration: passwordDecoration('Confirmar contraseña', hideConfirmation, () => setState(() => hideConfirmation = !hideConfirmation)),
         validator: (v) => v == null || v.isEmpty ? 'Repite tu contraseña' : v != password.text ? 'Las contraseñas no coinciden' : null),

@@ -1,3 +1,4 @@
+import '../../../core/validation/form_validators.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -56,6 +57,8 @@ class LocalCatalogRepository extends ChangeNotifier implements CatalogRepository
   }
   Future<Song> save({Song? existing, required String title, required String artist,
       required String genre, List<String>? moods, File? audio, File? cover}) => _exclusive(() async {
+    final validation = validateSongTitle(title) ?? validateArtist(artist);
+    if (validation != null) throw ArgumentError(validation);
     if ([title, artist, genre].any((v) => v.trim().isEmpty || v.trim().length > 100)) {
       throw ArgumentError('Completa los campos con un máximo de 100 caracteres.');
     }

@@ -63,7 +63,6 @@ class _AuthScreenState extends State<AuthScreen> {
       const SizedBox(height: 20), const Text('¿Primera vez en MoodMusic?', textAlign: TextAlign.center),
       TextButton(onPressed: busy ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(
         builder: (_) => RegisterScreen(repository: widget.repository))), child: const Text('Crear una cuenta')),
-      TextButton(onPressed: busy ? null : widget.controller.enterDemo, child: const Text('Explorar demostración', style: TextStyle(fontSize: 12))),
     ]))),
   );
 }

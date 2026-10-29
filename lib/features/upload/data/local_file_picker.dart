@@ -5,12 +5,23 @@ import 'package:path_provider/path_provider.dart';
 class LocalFilePicker {
   static Future<File?> pick({required bool cover, bool video = false}) async {
     final maxMb = cover ? 5 : video ? 300 : 100;
-    final picked = await FilePicker.pickFile(type: FileType.custom,
-      allowedExtensions: cover ? ['jpg','jpeg','png','webp'] : video ? ['mp4','mov','m4v','3gp','mkv'] : ['mp3','m4a','aac','wav','ogg','flac']);
+    final picked = await FilePicker.pickFile(
+      dialogTitle: video ? 'Selecciona un video' : null,
+      type: video ? FileType.video : FileType.custom,
+      allowedExtensions: cover
+          ? ['jpg', 'jpeg', 'png', 'webp']
+          : video
+              ? null
+              : ['mp3', 'm4a', 'aac', 'wav', 'ogg', 'flac'],
+    );
     if (picked == null) return null;
-    final extension = picked.name.split('.').last.toLowerCase();
+    final safeName = picked.name.split(RegExp(r'[/\\]')).last
+        .replaceAll(RegExp(r'[^a-zA-Z0-9 ._()áéíóúÁÉÍÓÚñÑ-]'), '_');
+    if (safeName.isEmpty || safeName == '.' || safeName == '..') {
+      throw StateError('El nombre del archivo no es válido.');
+    }
     final folder = await (await getTemporaryDirectory()).createTemp('mood_import_');
-    final target = File('${folder.path}/selected.$extension');
+    final target = File('${folder.path}/$safeName');
     final sink = target.openWrite();
     var count = 0;
     try {

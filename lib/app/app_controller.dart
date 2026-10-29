@@ -1,4 +1,5 @@
 import '../features/catalog/data/account_catalog_repository.dart';
+import '../features/playlists/domain/music_playlist.dart';
 import '../features/catalog/data/local_catalog_repository.dart';
 import '../features/profile/domain/access_repository.dart';
 import '../features/activity/data/listening_tracker.dart';
@@ -52,6 +53,60 @@ class AppController extends ChangeNotifier {
       sessionReady = true; sessionError = true; notifyListeners();
     });
   }
+  Future<void> _playlistQueue = Future<void>.value();
+  List<MusicPlaylist> get playlists =>
+      userId == null ? [] : _preferences.playlistsFor(userId!);
+  Future<void> savePlaylist({
+    required String uid,
+    String? id,
+    required String title,
+    required List<String> songs,
+  }) {
+    final operation = _playlistQueue.then((_) async {
+      if (_disposed || userId != uid) {
+        throw StateError('La sesión cambió. Abre la biblioteca de tu cuenta.');
+      }
+      final name = title.trim();
+      if (name.isEmpty || name.length > 60) {
+        throw ArgumentError('Usa un nombre de 1 a 60 caracteres.');
+      }
+      final current = _preferences.playlistsFor(uid);
+      final playlist = MusicPlaylist(
+        id: id ?? DateTime.now().microsecondsSinceEpoch.toString(),
+        name: name,
+        songIds: songs.toSet().toList(),
+      );
+      final index = current.indexWhere((p) => p.id == playlist.id);
+      if (index < 0) {
+        current.add(playlist);
+      } else {
+        current[index] = playlist;
+      }
+      await _preferences.savePlaylists(uid, current);
+      if (!_disposed && userId == uid) {
+        notifyListeners();
+      }
+    });
+    _playlistQueue = operation.catchError((Object _) {});
+    return operation;
+  }
+
+  Future<void> deletePlaylist(String uid, String id) {
+    final operation = _playlistQueue.then((_) async {
+      if (_disposed || userId != uid) {
+        throw StateError('La sesión cambió.');
+      }
+      final current = _preferences.playlistsFor(uid)
+        ..removeWhere((p) => p.id == id);
+      await _preferences.savePlaylists(uid, current);
+      if (!_disposed && userId == uid) {
+        notifyListeners();
+      }
+    });
+    _playlistQueue = operation.catchError((Object _) {});
+    return operation;
+  }
+
   final MusicAudioHandler? audio;
   final LikesRepository? likes;
   final ListeningRepository? history;

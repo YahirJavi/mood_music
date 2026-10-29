@@ -23,7 +23,7 @@ void main() {
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'Yahir');
     await tester.enterText(fields.at(1), 'yahir@example.com');
-    await tester.enterText(fields.at(2), 'clave123');
+    await tester.enterText(fields.at(2), 'Clave123!');
     await tester.enterText(fields.at(3), 'distinta123');
     final button = find.widgetWithText(FilledButton, 'Crear cuenta');
     await tester.ensureVisible(button); await tester.tap(button); await tester.pump();
@@ -31,7 +31,7 @@ void main() {
     expect(find.text('Las contraseñas no coinciden'), findsOneWidget);
     expect(repository.registrations, 0);
     await tester.ensureVisible(fields.at(3));
-    await tester.enterText(fields.at(3), 'clave123');
+    await tester.enterText(fields.at(3), 'Clave123!');
     await tester.ensureVisible(button); await tester.tap(button); await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(repository.registrations, 1);
