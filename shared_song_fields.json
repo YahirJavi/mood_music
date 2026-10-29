@@ -3,5 +3,6 @@
   "title": "Viva la Vida",
   "artist": "Coldplay",
   "genre": "Rock",
-  "audioUrl": "https://moodmusic-4b6b7-audio.web.app/audio/viva-la-vida.mp3"
+  "audioUrl": "https://moodmusic-4b6b7-audio.web.app/audio/viva-la-vida.mp3",
+  "coverUrl": "https://moodmusic-4b6b7-audio.web.app/covers/viva-la-vida.jpg"
 }

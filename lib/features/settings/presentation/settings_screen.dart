@@ -12,6 +12,11 @@ class SettingsScreen extends StatelessWidget {
       Text('Apariencia', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 16),
       Wrap(spacing: 8, children: ThemeMode.values.map((mode) => ChoiceChip(
         label: Text(switch (mode) { ThemeMode.dark => 'Oscuro', ThemeMode.light => 'Claro', ThemeMode.system => 'Sistema' }),
+        avatar: Icon(switch (mode) {
+          ThemeMode.system => Icons.settings_suggest_outlined,
+          ThemeMode.light => Icons.light_mode_outlined,
+          ThemeMode.dark => Icons.dark_mode_outlined,
+        }, size: 18, color: mode == ThemeMode.system ? Colors.blue : null),
         selected: controller.themeMode == mode,
         onSelected: (_) => runAction(context, () => controller.setTheme(mode)),
       )).toList()),

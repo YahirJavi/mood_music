@@ -1,4 +1,3 @@
-import '../../admin/presentation/local_songs_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../app/app_controller.dart';
 import '../../admin/presentation/admin_screen.dart';
@@ -29,15 +28,25 @@ class ProfileScreen extends StatelessWidget {
       final value = await showDialog<String>(context: context, builder: (_) => _NameDialog(initial: controller.name));
       if (value != null && context.mounted) await runAction(context, () => controller.setName(value));
     }),
-    if (controller.isSignedIn) ListTile(leading: const Icon(Icons.library_music_outlined),
-      title: const Text('Mi música'), subtitle: const Text('Agregar, editar y eliminar canciones'),
-      onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => LocalSongsScreen(controller: controller)))),
     if (controller.isAdmin) ListTile(leading: const Icon(Icons.admin_panel_settings_outlined),
       title: const Text('Panel de administrador'),
       onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AdminScreen(controller: controller)))),
     ListTile(leading: const Icon(Icons.settings_outlined), title: const Text('Ajustes'), onTap: () =>
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => SettingsScreen(controller: controller)))),
-    ListTile(leading: const Icon(Icons.logout), title: Text(controller.isSignedIn ? 'Cerrar sesión' : 'Salir de la demostración'), onTap: () {
+    ListTile(leading: const Icon(Icons.logout), title: Text(controller.isSignedIn ? 'Cerrar sesión' : 'Salir de la demostración'), onTap: () async {
+      final owner = controller.userId;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('¿Seguro que quieres salir?'),
+          content: const Text('La reproducción se detendrá.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancelar')),
+            FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Salir')),
+          ],
+        ),
+      );
+      if (confirmed != true || !context.mounted || controller.userId != owner) return;
       if (controller.isSignedIn) { runAction(context, controller.signOut); } else { controller.leaveDemo(); }
     }),
   ]);

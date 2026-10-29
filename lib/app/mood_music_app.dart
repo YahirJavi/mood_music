@@ -1,5 +1,5 @@
 import 'dart:async';
-import '../core/widgets/music_motion.dart';
+import '../core/widgets/launch_intro.dart';
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
 import '../features/auth/domain/auth_repository.dart';
@@ -14,21 +14,45 @@ class MoodMusicApp extends StatefulWidget {
   @override
   State<MoodMusicApp> createState() => _MoodMusicAppState();
 }
-class _MoodMusicAppState extends State<MoodMusicApp> {
+class _MoodMusicAppState extends State<MoodMusicApp> with WidgetsBindingObserver {
   bool _intro = true;
+  bool _introVisible = true;
+  Timer? _exitTimer;
   Timer? _timer;
   AppController get controller => widget.controller;
   AuthRepository get auth => widget.auth;
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(milliseconds: 1200), () {
-      if (mounted) setState(() => _intro = false);
+    WidgetsBinding.instance.addObserver(this);
+    _startIntro();
+  }
+  void _startIntro() {
+    _timer?.cancel();
+    _exitTimer?.cancel();
+    controller.audio?.welcomeOnNextOpen = false;
+    _intro = true;
+    _introVisible = true;
+    _timer = Timer(const Duration(milliseconds: 3600), () {
+      if (!mounted) return;
+      setState(() => _introVisible = false);
+      _exitTimer = Timer(const Duration(milliseconds: 400), () {
+        if (mounted) setState(() => _intro = false);
+      });
     });
   }
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        controller.audio?.welcomeOnNextOpen == true && mounted) {
+      setState(_startIntro);
+    }
+  }
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+    _exitTimer?.cancel();
     super.dispose();
   }
   @override
@@ -43,16 +67,13 @@ class _MoodMusicAppState extends State<MoodMusicApp> {
       builder: (context, child) => Stack(children: [
         ExcludeSemantics(excluding: _intro,
           child: IgnorePointer(ignoring: _intro, child: child ?? const SizedBox.shrink())),
-        if (_intro) Positioned.fill(child: Material(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          child: const SafeArea(child: Center(child: MusicEntrance(
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              MusicEmblem(size: 104),
-              SizedBox(height: 28),
-              Text('MoodMusic', style: TextStyle(fontSize: 34,
-                fontWeight: FontWeight.w900, letterSpacing: -1)),
-            ]),
-          ))))),
+        if (_intro) Positioned.fill(child: AnimatedOpacity(
+          opacity: _introVisible ? 1 : 0,
+          duration: MediaQuery.of(context).disableAnimations
+              ? Duration.zero : const Duration(milliseconds: 400),
+          curve: Curves.easeOutCubic,
+          child: const LaunchIntro(),
+        )),
       ]),
       home: !controller.sessionReady
           ? const Scaffold(body: Center(child: CircularProgressIndicator()))

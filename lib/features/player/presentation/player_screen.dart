@@ -99,6 +99,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                       child: PlayerArtwork(
                                           songId: _song.id,
                                           path: _song.coverUrl,
+                                          fallbackAsset: _song.id ==
+                                                  'shared_demo_01'
+                                              ? 'hosting_audio/covers/viva-la-vida.jpg'
+                                              : null,
                                           playing: _audio.isPlaying &&
                                               !_loading &&
                                               _error == null &&
@@ -161,7 +165,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                   if (_error != null) ...[
                                     Text(_error!, textAlign: TextAlign.center),
                                     TextButton(
-                                        onPressed: _loading ? null : _load,
+                                        onPressed: _loading ? null : () => _audio.currentSong == null ? _load() : _audio.retry(),
                                         child: const Text('Reintentar'))
                                   ],
                                   StreamBuilder<Duration?>(
@@ -294,12 +298,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                                       Icons.skip_next_rounded)),
                                             ]);
                                       }),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                      _queue.isEmpty
-                                          ? 'Reproducción detenida'
-                                          : 'Canción ${_index + 1} de ${_queue.length}',
-                                      textAlign: TextAlign.center),
                                 ]))))),
           ));
 }

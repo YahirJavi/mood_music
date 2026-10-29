@@ -1,3 +1,4 @@
+import '../../../core/validation/form_validators.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
@@ -28,6 +29,8 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
   late String? _genre = widget.song?.genre;
   late final Set<String> _moods = {...?widget.song?.moods};
   String _status = '';
+  String? _audioName;
+  int? _audioBytes;
   File? _audio, _cover;
   bool _busy = false;
   String? _error;
@@ -35,6 +38,7 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
     setState(() { _busy = true; _error = null; _status = video ? 'Seleccionando video…' : 'Seleccionando archivo…'; });
     try {
       var file = await LocalFilePicker.pick(cover: cover, video: video);
+      final sourceName = file?.uri.pathSegments.last;
       if (file != null && video) {
         final source = file;
         if (mounted) setState(() => _status = 'Extrayendo el sonido del video…');
@@ -43,8 +47,18 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
       }
       if (!mounted) { await LocalFilePicker.release(file); return; }
       if (file != null) {
-        await LocalFilePicker.release(cover ? _cover : _audio);
-        if (cover) { _cover = file; } else { _audio = file; }
+        final bytes = cover ? null : await file.length();
+        if (!mounted || !_allowed) {
+          await LocalFilePicker.release(file);
+          return;
+        }
+        final previous = cover ? _cover : _audio;
+        if (cover) { _cover = file; } else {
+          _audio = file;
+          _audioName = video ? '$sourceName → audio.m4a' : sourceName;
+          _audioBytes = bytes;
+        }
+        await LocalFilePicker.release(previous);
       }
     } on PlatformException catch (error) {
       if (mounted) _error = error.message ?? 'No se pudo extraer el audio de este video.';
@@ -88,14 +102,18 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
     builder: (context, _) => PopScope(canPop: !_busy, child: Scaffold(
       appBar: AppBar(title: Text(widget.song == null ? 'Agregar canción' : 'Editar canción')),
       body: !_allowed ? const Center(child: Text('Vuelve a Mi música para abrir la biblioteca de tu cuenta.')) :
-      Form(key: _form, child: ListView(padding: const EdgeInsets.all(24), children: [
+      SafeArea(child: Align(alignment: Alignment.topCenter,
+        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 620),
+      child: Form(key: _form, child: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32), children: [
         Center(child: SongCover(path: _cover?.path ?? widget.song?.coverUrl, size: 180)),
         TextButton.icon(onPressed: _busy ? null : () => _pick(true), icon: const Icon(Icons.image_outlined), label: const Text('Elegir portada')),
         const SizedBox(height: 16),
         for (final field in [(controller: _title, label: 'Título'), (controller: _artist, label: 'Artista')])
           Padding(padding: const EdgeInsets.only(bottom: 16), child: TextFormField(controller: field.controller,
-            enabled: !_busy, maxLength: 100, decoration: InputDecoration(labelText: field.label),
-            validator: (value) => value == null || value.trim().isEmpty ? 'Completa este campo.' : null)),
+            enabled: !_busy, maxLength: 30, decoration: InputDecoration(labelText: field.label),
+            validator: identical(field.controller, _artist) ? validateArtist : validateSongTitle)),
         DropdownButtonFormField<String>(
           initialValue: _genre, isExpanded: true,
           decoration: const InputDecoration(labelText: 'Género'),
@@ -115,16 +133,31 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
         const SizedBox(height: 20),
         OutlinedButton.icon(onPressed: _busy ? null : () => _pick(false), icon: const Icon(Icons.audio_file_outlined),
           label: Text(_audio != null ? 'Audio seleccionado · Cambiar' : widget.song != null ? 'Reemplazar audio (opcional)' : 'Seleccionar audio')),
+        if (_audio != null) Card(child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Icon(Icons.audio_file, color: Colors.green),
+            const SizedBox(height: 8),
+            Text(_audioName ?? 'Audio', softWrap: true),
+            if (_audioBytes != null) Text('${(_audioBytes! / 1048576).toStringAsFixed(1)} MB'),
+            const SizedBox(height: 8),
+            const LinearProgressIndicator(value: 1),
+            const SizedBox(height: 8),
+            const Text('Archivo listo. Pulsa Guardar canción para añadirlo a tu biblioteca.'),
+          ]),
+        )),
         const SizedBox(height: 8), const Text('MP3, M4A, AAC, WAV, OGG o FLAC · hasta 100 MB'),
         const SizedBox(height: 12),
         OutlinedButton.icon(onPressed: _busy ? null : () => _pick(false, video: true),
-          icon: const Icon(Icons.video_file_outlined), label: const Text('Extraer audio de un video')),
+          icon: const Icon(Icons.video_file_outlined), label: const Text('Extraer audio de un video', textAlign: TextAlign.center)),
         const Text('Video · hasta 300 MB'),
+        const SizedBox(height: 8),
+        const Text('Después de guardarlo: Mi música → menú de la canción → Exportar audio.'),
         if (_error != null) Padding(padding: const EdgeInsets.symmetric(vertical: 16), child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
         const SizedBox(height: 16),
         if (_busy) ...[Text(_status), const SizedBox(height: 8), const LinearProgressIndicator()],
         FilledButton.icon(onPressed: _busy ? null : _save, icon: const Icon(Icons.save_outlined), label: const Text('Guardar canción')),
-      ])),
+      ]))))),
     )),
   );
 }

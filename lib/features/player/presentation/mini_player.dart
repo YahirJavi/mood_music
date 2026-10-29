@@ -17,7 +17,8 @@ class MiniPlayer extends StatelessWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-            leading: SongCover(path: song.coverUrl, size: 44),
+            leading: SongCover(path: song.coverUrl, size: 44,
+              fallbackAsset: song.id == 'shared_demo_01' ? 'hosting_audio/covers/viva-la-vida.jpg' : null),
             title: Text(song.title, maxLines: 1, overflow: TextOverflow.ellipsis),
             subtitle: Text(audio.error ?? song.artist, maxLines: 1, overflow: TextOverflow.ellipsis),
             onTap: () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => PlayerScreen(song: song, controller: controller))),

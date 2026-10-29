@@ -15,11 +15,15 @@ void main() {
     final first = readSharedSong(data())!;
     final second = readSharedSong({...data(), 'title': 'Título corregido'})!;
     expect(first.id, 'shared_demo_01');
-    expect(first.coverUrl, isNull);
+    expect(first.coverUrl,
+        'https://moodmusic-4b6b7-audio.web.app/covers/viva-la-vida.jpg');
     expect(readSharedSong({...data(), 'coverUrl': 'https://example.com/cover.jpg'})!.coverUrl,
         'https://example.com/cover.jpg');
-    expect(readSharedSong({...data(), 'coverUrl': '/private/cover.jpg'})!.coverUrl, isNull);
-    expect(readSharedSong({...data(), 'coverUrl': 123})!.coverUrl, isNull);
+    expect(readSharedSong({...data(), 'coverUrl': '/private/cover.jpg'})!.coverUrl,
+        'https://moodmusic-4b6b7-audio.web.app/covers/viva-la-vida.jpg');
+    expect(
+        readSharedSong({...data(), 'coverUrl': 123})!.coverUrl,
+        'https://moodmusic-4b6b7-audio.web.app/covers/viva-la-vida.jpg');
     expect(second.id, first.id);
     expect(mediaUri(first.audioUrl!).scheme, 'https');
     expect(mediaUri('/tmp/song.mp3').scheme, 'file');

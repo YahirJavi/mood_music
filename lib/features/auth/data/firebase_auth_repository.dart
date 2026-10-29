@@ -64,8 +64,11 @@ class FirebaseAuthRepository implements AuthRepository {
       final credential = firebase.GoogleAuthProvider.credential(idToken: idToken);
       await _auth.signInWithCredential(credential);
     } on GoogleSignInException catch (error) {
-      // Mantiene el código para mostrar mensajes útiles sin registrar tokens.
-      throw firebase.FirebaseAuthException(code: 'google-${error.code.name}');
+      debugPrint('Google Sign-In falló: ${error.code.name}');
+      throw firebase.FirebaseAuthException(code: 'google-${error.code.name}', message: error.toString());
+    } catch (error) {
+      debugPrint('Google Sign-In falló con error inesperado: $error');
+      rethrow;
     }
   }
 }

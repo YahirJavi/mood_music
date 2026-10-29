@@ -4,10 +4,11 @@ import '../../../core/widgets/music_motion.dart';
 import '../../catalog/presentation/song_cover.dart';
 
 class PlayerArtwork extends StatelessWidget {
-  const PlayerArtwork({super.key, required this.songId, required this.path, required this.playing});
+  const PlayerArtwork({super.key, required this.songId, required this.path, required this.playing, this.fallbackAsset});
   final String songId;
   final String? path;
   final bool playing;
+  final String? fallbackAsset;
   @override
   Widget build(BuildContext context) => LayoutBuilder(builder: (context, constraints) {
     final size = math.min(constraints.maxWidth - 24, 350.0);
@@ -16,7 +17,7 @@ class PlayerArtwork extends StatelessWidget {
       active: playing,
       child: AnimatedSwitcher(
         duration: Duration(milliseconds: reduced ? 0 : 400),
-        child: SongCover(key: ValueKey('$songId:$path'), path: path, size: size)),
+        child: SongCover(key: ValueKey('$songId:$path'), path: path, size: size, fallbackAsset: fallbackAsset)),
       builder: (context, phase, child) {
         final pulse = playing ? (math.sin(phase * math.pi * 2) + 1) / 2 : 0.0;
         return Transform.translate(offset: Offset(0, -pulse * 4),
